@@ -1,10 +1,13 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
-
+FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-devel
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM nvcr.io/nvidia/pytorch:21.10-py3
+# FROM nvcr.io/nvidia/pytorch:21.10-py3
 
 # Install linux packages
 RUN apt update && apt install -y zip htop screen libgl1-mesa-glx
+
+RUN apt install -y libglib2.0-0 vim 
+
 
 # Install python dependencies
 COPY requirements.txt .
@@ -21,12 +24,24 @@ WORKDIR /usr/src/app
 # Copy contents
 COPY . /usr/src/app
 
+ADD https://github.com/ultralytics/yolov5/releases/download/v4.0/yolov5s.pt /usr/src/app/
+
 # Downloads to user config dir
 ADD https://ultralytics.com/assets/Arial.ttf /root/.config/Ultralytics/
 
 # Set environment variables
 # ENV HOME=/usr/src/app
 
+# Set user and group
+ARG user=brianj
+ARG group=brianj
+ARG uid=1000
+ARG gid=1000
+RUN groupadd -g ${gid} ${group}
+RUN useradd -u ${uid} -g ${group} -s /bin/sh -m ${user} # <--- the '-m' create a user home directory
+
+# Switch to user
+USER ${uid}:${gid}
 
 # Usage Examples -------------------------------------------------------------------------------------------------------
 
